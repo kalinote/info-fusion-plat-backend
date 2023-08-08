@@ -5,8 +5,8 @@ class VerificationCode(APIView):
     def get(self, request, *args, **kwargs):
         response_data = {
         'code': 0,
-        'data': "@image(100x40, #dcdfe6, #000000, png, V3Admin)",
-        'message': "获取验证码成功"
+        'data': "http://dummyimage.com/100x40/dcdfe6/000000.png&text=No code",
+        'message': "成功"
         }
         return Response(response_data)
 
@@ -20,14 +20,14 @@ class UserLoginView(APIView):
             "data": {
                 "token": fake_token
             },
-            "message": "登录成功"
+            "message": "成功"
         }
         return Response(response_data)
 
 class UserView(APIView):
     def get(self, request, *args, **kwargs):
         # 假设用户详情已经验证和获取成功
-        username = "JohnDoe"
+        username = "Admin"
         roles = ["admin", "manager"]
         
         response_data = {
@@ -36,6 +36,6 @@ class UserView(APIView):
                 "username": username,
                 "roles": roles
             },
-            "message": "获取用户详情成功"
+            "message": "成功"
         }
         return Response(response_data)
