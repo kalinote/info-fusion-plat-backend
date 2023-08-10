@@ -1,7 +1,12 @@
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 
 class VerificationCode(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, *args, **kwargs):
         response_data = {
         'code': 0,
@@ -10,22 +15,41 @@ class VerificationCode(APIView):
         }
         return Response(response_data)
 
-class UserLoginView(APIView):
+class UserLogin(APIView):
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
-        # 假设验证通过后，生成一个假的token
-        fake_token = 'your_fake_token_here'
-        
-        response_data = {
-            "code": 0,
-            "data": {
-                "token": fake_token
-            },
-            "message": "成功"
-        }
-        return Response(response_data)
+        """
+        用户登录
 
-class UserView(APIView):
+        code: 401
+        message: 用户名或密码错误
+
+        code: 0
+        message: 成功
+        """
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            token, created = Token.objects.get_or_create(user=user)
+            response_data = {
+                "code": 0,
+                "data": {"token": token.key},
+                "message": "成功"
+            }
+            return Response(response_data)
+        else:
+            response_data = {
+                "code": 401,
+                "message": "用户名或密码错误"
+            }
+            return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
+
+class UserInfo(APIView):
     def get(self, request, *args, **kwargs):
+
         # 假设用户详情已经验证和获取成功
         username = "Admin"
         roles = ["admin", "manager"]

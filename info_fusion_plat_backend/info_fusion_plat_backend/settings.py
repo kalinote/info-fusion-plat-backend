@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'user_action.apps.UserActionConfig',
     'dashboard.apps.DashboardConfig',
     'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 配置认证类，可以根据需求添加多个认证类
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # 使用Token认证
+        'rest_framework.authentication.SessionAuthentication',  # 使用Session认证
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+AUTH_USER_MODEL = "user_action.User"
