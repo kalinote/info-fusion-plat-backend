@@ -82,3 +82,65 @@ class DailyHighWeightInfo(APIView):
             'message': "成功"
         }
         return Response(response_data)
+
+class NodeInfo(APIView):
+    def get(self, request, *args, **kwargs):
+        response_data = {
+            'code': 0,
+            'data': {"list": [
+                [
+                    {
+                    'title': "在线节点",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "node",
+                    'value': 1
+                    },
+                    {
+                    'title': "项目",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "project",
+                    'value': 2
+                    },
+                    {
+                    'title': "爬虫",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "spider",
+                    'value': 0
+                    },
+                    {
+                    'title': "定时任务",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "timed-task",
+                    'value': 0
+                    }
+                ],
+                [
+                    {
+                    'title': "任务总数",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "task-count",
+                    'value': 0
+                    },
+                    {
+                    'title': "错误任务",
+                    'value': 0,
+                    'color': { 'background': "#F87F7D" },
+                    'icon': "error"
+                    },
+                    {
+                    'title': "结果总数",
+                    'color': { 'background': "#B3E19D" },
+                    'icon': "result-count",
+                    'value': 3245200
+                    },
+                    {
+                    'title': "正在运行",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "running",
+                    'value': 0
+                    }
+                ]
+            ]},
+            'message': "成功"
+        }
+        return Response(response_data)
