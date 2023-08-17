@@ -27,7 +27,14 @@ def get_daily_datas():
                     "lte": now.strftime('%Y-%m-%d %H:%M:%S')
                 }
             }
-        }
+        },
+        "sort": [
+            {
+                "gather_time": {
+                    "order": "desc"
+                }
+            }
+        ]
     }
 
     # 分页查询

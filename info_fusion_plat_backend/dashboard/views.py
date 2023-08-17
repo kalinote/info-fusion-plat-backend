@@ -54,7 +54,7 @@ class NodeInfo(APIView):
         login_response = requests.get(
             url="http://backend-service:8080/api/stats/overview",
             headers={
-                'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YzhjYzliZjI3MTg1ZmI1ZjM0NTkxOSIsIm5iZiI6MTY5MDk5NzA2MCwidXNlcm5hbWUiOiJhZG1pbiJ9.KSgi1ZhzaC7gh_xslot05dMtBR6XK152diO5M69C32M'
+                'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YzhjYzliZjI3MTg1ZmI1ZjM0NTkxOSIsIm5iZiI6MTY5MjA3MzQxNSwidXNlcm5hbWUiOiJhZG1pbiJ9.e7WGTiAc5B76z-Q4zzUJATP0k_4ACCc-Cemx5HuqrrQ'
             }
         )
 
