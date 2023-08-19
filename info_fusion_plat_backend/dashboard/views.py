@@ -2,10 +2,12 @@ import json
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 import requests
+import logging
 
 from util_tools.es_tools import get_daily_datas, calculate_tags, get_count_by_index
+from token_management.models import PlatformToken
 
-
+logger = logging.getLogger(__name__)
 
 class CollectedInfoSummaryData(APIView):
     def get(self, request, *args, **kwargs):
@@ -51,12 +53,39 @@ class NodeInfo(APIView):
     def get(self, request, *args, **kwargs):
 
         # TODO: 后面用数据库管理cookie，并封装成接口
+        token = PlatformToken.objects.filter(env_var_name='crawlab_token').first()
+        if not token:
+            return Response({
+                'code': 1,
+                'message': 'Token不存在, 请到Token管理页面设置crawlab_token字段以用于获取相关数据',
+                'data': {}
+            })
+
         login_response = requests.get(
             url="http://backend-service:8080/api/stats/overview",
             headers={
-                'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YzhjYzliZjI3MTg1ZmI1ZjM0NTkxOSIsIm5iZiI6MTY5MjA3MzQxNSwidXNlcm5hbWUiOiJhZG1pbiJ9.e7WGTiAc5B76z-Q4zzUJATP0k_4ACCc-Cemx5HuqrrQ'
+                'Authorization': token.value
             }
         )
+
+        if login_response.status_code != 200:
+            return Response({
+                'code': 2,
+                'message': '获取节点信息失败',
+                'data': {}
+            })
+        if json.loads(login_response.text).get("error") == "http error: unauthorized":
+            # TODO: 后续增加登录功能
+            try:
+                token.status = False
+                token.save()
+            except Exception as e:
+                logger.error(f"尝试更新平台token状态时发生错误: {e}")
+            return Response({
+                'code': 3,
+                'message': 'Token已失效',
+                'data': {}
+            })
 
         node_info = json.loads(login_response.text)
 
