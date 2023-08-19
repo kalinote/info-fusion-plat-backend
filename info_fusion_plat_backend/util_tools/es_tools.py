@@ -111,4 +111,3 @@ def get_count_by_index(indexs):
         count += es.count(index=index)['count']
 
     return count
-
