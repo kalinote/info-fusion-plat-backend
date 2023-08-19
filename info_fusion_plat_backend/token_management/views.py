@@ -1,6 +1,7 @@
 import logging
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
+from token_management.serializers import PlatformTokenSerializer
 from token_management.models import PlatformToken
 
 logger = logging.getLogger(__name__)
@@ -39,4 +40,24 @@ class PlatfromTokenView(APIView):
             'code': 0,
             'message': '成功',
             'data': {}
+        })
+
+    def get(self, request, *args, **kwargs):
+        try:
+            tokens = PlatformToken.objects.all()
+            serializer = PlatformTokenSerializer(tokens, many=True)
+        except Exception as e:
+            logging.error(f"尝试获取平台token时发生错误: {e}")
+            return Response({
+                'code': 1,
+                'message': '获取Token列表时发生未知错误',
+                'data': {}
+            })
+        
+        return Response({
+            'code': 0,
+            'message': '成功',
+            'data': {
+                'list': serializer.data
+            }
         })
