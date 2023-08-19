@@ -50,8 +50,19 @@ class PlatfromTokenView(APIView):
         })
 
     def get(self, request, *args, **kwargs):
+        query_env_var_name = request.query_params.get('env_var_name', None)
+        query_platform = request.query_params.get('platform', None)
+        
         try:
+            # 构建基础查询集，即获取所有数据
             tokens = PlatformToken.objects.all()
+
+            # 如果提供了查询参数，根据参数进行过滤
+            if query_env_var_name:
+                tokens = tokens.filter(env_var_name__icontains=query_env_var_name)
+            if query_platform:
+                tokens = tokens.filter(platform__icontains=query_platform)
+
             serializer = PlatformTokenSerializer(tokens, many=True)
         except Exception as e:
             logging.error(f"尝试获取平台token时发生错误: {e}")
