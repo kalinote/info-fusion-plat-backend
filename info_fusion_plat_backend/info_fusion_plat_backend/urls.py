@@ -5,4 +5,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('user_action.urls')),
     path('', include('dashboard.urls')),
+    path('', include('token_management.urls')),
 ]

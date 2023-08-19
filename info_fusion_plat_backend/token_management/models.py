@@ -1,13 +1,13 @@
 from django.db import models
 
-class PlatfromToken(models.Model):
+class PlatformToken(models.Model):
     id = models.AutoField(primary_key=True)
     env_var_name = models.CharField(max_length=100, unique=True)
     value = models.CharField(max_length=5000)
-    platfrom = models.CharField(max_length=100)
+    platform = models.CharField(max_length=100)
     description = models.CharField(max_length=500, null=True)
     is_using = models.BooleanField(default=False)
-    crate_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     status = models.IntegerField(default=0)
 

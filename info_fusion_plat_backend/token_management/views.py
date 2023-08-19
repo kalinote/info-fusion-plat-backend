@@ -1,6 +1,42 @@
+import logging
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
-from token_management.models import Token
+from token_management.models import PlatformToken
+
+logger = logging.getLogger(__name__)
 
 class PlatfromTokenView(APIView):
-    pass
+    def post(self, request, *args, **kwargs):
+        datas = request.data
+        print(datas)
+
+        env_var_name = datas.get('env_var_name')
+        if not env_var_name:
+            return Response({
+                'code': 1,
+                'message': '环境变量名不能为空',
+                'data': {}
+            })
+        check_exists = PlatformToken.objects.filter(env_var_name=env_var_name)
+        if check_exists:
+            return Response({
+                'code': 2,
+                'message': f'{env_var_name}已存在',
+                'data': {}
+            })
+        
+        try:
+            PlatformToken.objects.create(**datas)
+        except Exception as e:
+            logging.error(f"尝试添加平台token时发生错误: {e}")
+            return Response({
+                'code': 3,
+                'message': '添加Token时发生未知错误',
+                'data': {}
+            })
+
+        return Response({
+            'code': 0,
+            'message': '成功',
+            'data': {}
+        })

@@ -22,7 +22,7 @@ def get_daily_datas():
     query = {
         "query": {
             "range": {
-                "gather_time": {
+                "post_time": {
                     "gte": twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S'),
                     "lte": now.strftime('%Y-%m-%d %H:%M:%S')
                 }
@@ -30,7 +30,7 @@ def get_daily_datas():
         },
         "sort": [
             {
-                "gather_time": {
+                "post_time": {
                     "order": "desc"
                 }
             }
