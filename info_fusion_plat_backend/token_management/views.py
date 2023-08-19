@@ -65,6 +65,7 @@ class PlatfromTokenView(APIView):
             'code': 0,
             'message': '成功',
             'data': {
-                'list': serializer.data
+                'list': serializer.data,
+                'total': len(serializer.data)
             }
         })
