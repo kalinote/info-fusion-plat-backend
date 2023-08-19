@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 class PlatfromTokenView(APIView):
     def post(self, request, *args, **kwargs):
         datas = request.data
-        print(datas)
 
         env_var_name = datas.get('env_var_name')
         if not env_var_name:
@@ -27,7 +26,15 @@ class PlatfromTokenView(APIView):
             })
         
         try:
-            PlatformToken.objects.create(**datas)
+            serializer = PlatformTokenSerializer(data=datas)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response({
+                    'code': 4,
+                    'message': 'Token对象结构校验失败',
+                    'data': {}
+                })
         except Exception as e:
             logging.error(f"尝试添加平台token时发生错误: {e}")
             return Response({
