@@ -61,6 +61,13 @@ class NodeInfo(APIView):
                 'data': {}
             })
 
+        if not token.status or not token.is_using:
+            return Response({
+                'code': 2,
+                'message': 'Token已失效或未启用, 请到Token管理页面更新crawlab_token字段设置以用于获取相关数据',
+                'data': {}
+            })
+
         login_response = requests.get(
             url="http://backend-service:8080/api/stats/overview",
             headers={
@@ -70,7 +77,7 @@ class NodeInfo(APIView):
 
         if login_response.status_code != 200:
             return Response({
-                'code': 2,
+                'code': 3,
                 'message': '获取节点信息失败',
                 'data': {}
             })
@@ -82,7 +89,7 @@ class NodeInfo(APIView):
             except Exception as e:
                 logger.error(f"尝试更新平台token状态时发生错误: {e}")
             return Response({
-                'code': 3,
+                'code': 4,
                 'message': 'Token已失效',
                 'data': {}
             })
