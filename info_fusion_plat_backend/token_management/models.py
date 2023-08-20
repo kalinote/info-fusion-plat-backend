@@ -9,7 +9,7 @@ class PlatformToken(models.Model):
     is_using = models.BooleanField(default=False)
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
-    status = models.IntegerField(default=0)
+    status = models.BooleanField(default=False)
 
     def __str__(self):
         return self.env_var_name

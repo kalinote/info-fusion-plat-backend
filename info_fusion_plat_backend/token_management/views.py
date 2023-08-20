@@ -30,6 +30,7 @@ class PlatfromTokenView(APIView):
             if serializer.is_valid():
                 serializer.save()
             else:
+                logger.error(f"尝试添加平台token时发生错误: {serializer.errors} \n 数据内容: {datas}")
                 return Response({
                     'code': 4,
                     'message': 'Token对象结构校验失败',
