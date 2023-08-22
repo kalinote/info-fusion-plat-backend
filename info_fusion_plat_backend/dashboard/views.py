@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class CollectedInfoSummaryData(APIView):
     def get(self, request, *args, **kwargs):
         datas = get_daily_datas()
+
         tags = calculate_tags(datas)
 
         total_info_count = get_count_by_index("rss_handle")
