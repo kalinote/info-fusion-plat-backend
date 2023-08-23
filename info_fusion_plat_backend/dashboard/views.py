@@ -31,7 +31,7 @@ class CollectedInfoSummaryData(APIView):
 
 class DailyNewInfo(APIView):
     def get(self, request, *args, **kwargs):
-        datas = get_daily_datas()[:5]
+        datas = get_daily_datas()[:10]
         data_list = []
         for data in datas:
             data_list.append({
