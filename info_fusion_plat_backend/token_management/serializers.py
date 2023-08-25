@@ -6,3 +6,9 @@ class PlatformTokenSerializer(serializers.ModelSerializer):
         model = PlatformToken
         fields = '__all__'
         
+class PlatformTokenDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlatformToken
+        exclude = ('is_deleted',)
+
+

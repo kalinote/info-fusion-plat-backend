@@ -2,7 +2,7 @@ import time
 import logging
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
-from token_management.serializers import PlatformTokenSerializer
+from token_management.serializers import PlatformTokenDataSerializer
 from token_management.models import PlatformToken
 
 logger = logging.getLogger(__name__)
@@ -20,16 +20,16 @@ class PlatfromTokenView(APIView):
                 'message': '环境变量名不能为空',
                 'data': {}
             })
-        check_exists = PlatformToken.objects.filter(env_var_name=env_var_name)
+        check_exists = PlatformToken.objects.filter(env_var_name=env_var_name, is_deleted=False).exists()       
         if check_exists:
             return Response({
                 'code': 2,
-                'message': f'{env_var_name}已存在',
+                'message': f'{env_var_name}已存在, 不能重复添加。 ',
                 'data': {}
             })
         
         try:
-            serializer = PlatformTokenSerializer(data=datas)
+            serializer = PlatformTokenDataSerializer(data=datas)
             if serializer.is_valid():
                 serializer.save()
             else:
@@ -59,7 +59,7 @@ class PlatfromTokenView(APIView):
         
         try:
             # 构建基础查询集，即获取所有数据
-            tokens = PlatformToken.objects.all()
+            tokens = PlatformToken.objects.filter(is_deleted=False)
 
             # 如果提供了查询参数，根据参数进行过滤
             if query_env_var_name:
@@ -67,7 +67,7 @@ class PlatfromTokenView(APIView):
             if query_platform:
                 tokens = tokens.filter(platform__icontains=query_platform)
 
-            serializer = PlatformTokenSerializer(tokens, many=True)
+            serializer = PlatformTokenDataSerializer(tokens, many=True)
         except Exception as e:
             logging.error(f"尝试获取平台token时发生错误: {e}")
             return Response({
@@ -96,7 +96,7 @@ class PlatfromTokenView(APIView):
             })
 
         try:
-            token = PlatformToken.objects.get(id=token_id)
+            token = PlatformToken.objects.get(id=token_id, is_deleted=False)
         except PlatformToken.DoesNotExist:
             return Response({
                 'code': 3,
@@ -104,7 +104,7 @@ class PlatfromTokenView(APIView):
                 'data': {}
             })
 
-        serializer = PlatformTokenSerializer(instance=token, data=datas)
+        serializer = PlatformTokenDataSerializer(instance=token, data=datas)
         if serializer.is_valid():
             serializer.save()
             return Response({
