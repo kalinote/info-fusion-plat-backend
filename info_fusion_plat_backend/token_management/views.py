@@ -119,3 +119,31 @@ class PlatfromTokenView(APIView):
                 'message': 'Token对象结构校验失败',
                 'data': {}
             })
+
+    def delete(self, request, *args, **kwargs):
+        token_id = request.query_params.get('id', -1)
+
+        token = PlatformToken.objects.filter(id=token_id, is_deleted=False).first()
+        if not token:
+            return Response({
+                'code': 1,
+                'message': 'id不存在',
+                'data': {}
+            })
+        
+        try:
+            token.is_deleted = True
+            token.save()
+        except Exception as e:
+            logger.error(f"尝试删除平台token时发生错误: {e}")
+            return Response({
+                'code': 2,
+                'message': '删除Token时发生未知错误',
+                'data': {}
+            })
+
+        return Response({
+            'code': 0,
+            'message': '成功',
+            'data': {}
+        })
