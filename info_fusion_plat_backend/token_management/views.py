@@ -120,8 +120,13 @@ class PlatfromTokenView(APIView):
                 'data': {}
             })
 
-    def delete(self, request, *args, **kwargs):
-        token_id = request.query_params.get('id', -1)
+    def delete(self, request, token_id=None, *args, **kwargs):
+        if not token_id:
+            return Response({
+                'code': 1,
+                'message': 'id不能为空',
+                'data': {}
+            })
 
         token = PlatformToken.objects.filter(id=token_id, is_deleted=False).first()
         if not token:
