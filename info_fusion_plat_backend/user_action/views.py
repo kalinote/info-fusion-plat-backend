@@ -47,13 +47,13 @@ class UserLogin(APIView):
             }
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
+
 class UserInfo(APIView):
     def get(self, request, *args, **kwargs):
-
-        # 假设用户详情已经验证和获取成功
+        # TODO: 这个接口还没做
         username = "Admin"
         roles = ["admin", "manager"]
-        
+
         response_data = {
             "code": 0,
             "data": {

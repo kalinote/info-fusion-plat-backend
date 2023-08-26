@@ -92,7 +92,7 @@ DATABASES = {
         "NAME": "info_fusion_plat",
         "USER": "root",
         "PASSWORD": "st3zvPr4expaszYRcRgrK.!8Cb6nbbDD",
-        "HOST": "127.0.0.1",
+        "HOST": "192.168.238.1",
         "PORT": "3306",
     }
 }
