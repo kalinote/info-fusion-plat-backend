@@ -11,4 +11,3 @@ class PlatformTokenDataSerializer(serializers.ModelSerializer):
         model = PlatformToken
         exclude = ('is_deleted',)
 
-
