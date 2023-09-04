@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-j41v@kcuq&+4-e#9(g_v^1(g%$$mjskc2*l-4!x1-ynaoh!gp%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['local-server']
+ALLOWED_HOSTS = ['192.168.238.128']
 
 
 # Application definition
@@ -91,8 +91,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "info_fusion_plat",
         "USER": "root",
-        "PASSWORD": "st3zvPr4expaszYRcRgrK.!8Cb6nbbDD",
-        "HOST": "192.168.238.1",
+        "PASSWORD": "WvF6k39kiFDfVpP7Lzn!U4TjpHwBVTZH",
+        "HOST": "192.168.238.128",
         "PORT": "3306",
     }
 }

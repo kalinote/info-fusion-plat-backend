@@ -70,7 +70,7 @@ class NodeInfo(APIView):
             })
 
         login_response = requests.get(
-            url="http://backend-service:8080/api/stats/overview",
+            url="http://192.168.238.128:8080/api/stats/overview",
             headers={
                 'Authorization': token.value
             }
