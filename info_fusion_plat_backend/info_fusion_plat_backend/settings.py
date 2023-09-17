@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
     'token_management.apps.TokenManagementConfig',
     'docker_controller.apps.DockerControllerConfig',
+    'agent_workflow.apps.AgentWorkflowConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]
