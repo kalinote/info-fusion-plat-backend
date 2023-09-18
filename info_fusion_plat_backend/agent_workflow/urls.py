@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import AgentHistory
+from .views import History
 
 urlpatterns = [
-    path('api/v1/agent_workflow/history', AgentHistory.as_view(), name='agent_workflow'),
+    path('api/v1/agent_workflow/history', History.as_view(), name='agent_workflow'),
 ]

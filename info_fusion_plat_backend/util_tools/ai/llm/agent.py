@@ -2,23 +2,9 @@ from datetime import datetime
 import logging
 import uuid
 
+from .thinking import Thinking
 
 logger = logging.getLogger(__name__)
-
-
-class Thinking:
-    """Agent的思考方式
-    """
-
-    def __init__(
-            self,
-            thinking_type
-        ):
-        self.thinking_type = thinking_type
-
-    class types:
-        OPENAI_GPT3 = 'openai_gpt3'
-        DEFAULT = OPENAI_GPT3
 
 class Memory:
     pass
@@ -47,13 +33,14 @@ class AgentManager:
             agent_role='manager',
         )
 
-    def add_history(self, content, operator, **kwargs):
+    def add_history(self, content, operator, level="info", **kwargs):
         self.history.append(
             {
                 "id": uuid.uuid4(),
                 "content": content,
                 "operator": operator,
                 "timestamp": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                "level" : level,
                 **kwargs
             }
         )
@@ -125,7 +112,7 @@ class Agent:
         )
 
 
-    def add_history(self, content, operator, no_report=False, **kwargs):
+    def add_history(self, content, operator, level="info", no_report=False, **kwargs):
         """新增历史记录
 
         Args:
@@ -139,6 +126,7 @@ class Agent:
                 "content": content,
                 "operator": operator,
                 "timestamp": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                "level": level,
                 **kwargs
             }
         )
@@ -146,7 +134,9 @@ class Agent:
             agent_manager.add_history(
                 content = f"{self.agent_name} 创建完成",
                 operator = operator,
-                agent_id = self.agent_id
+                agent_id = self.agent_id,
+                level=level,
+                kwargs=kwargs
             )
 
 class ManagerAgent(Agent):
@@ -223,3 +213,4 @@ class PlannerAgent(Agent):
 
 agent_manager = AgentManager()
 agent_manager.do_init()
+global_main_agent = agent_manager.global_main_agent
