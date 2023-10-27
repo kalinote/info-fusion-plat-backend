@@ -20,4 +20,3 @@ class PlatformToken(models.Model):
         ordering = ['id']
         verbose_name = '平台token'
         verbose_name_plural = '平台token'
-    
