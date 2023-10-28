@@ -1,3 +1,6 @@
+import json
+import logging
+
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -6,6 +9,9 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 
 from .serializers import UserRegistrationSerializer
+from .models import User
+
+logger = logging.getLogger(__name__)
 
 class VerificationCode(APIView):
     permission_classes = [AllowAny]
@@ -54,14 +60,47 @@ class UserLogin(APIView):
 class UserInfo(APIView):
     permission_classes = [AllowAny]
     def get(self, request, *args, **kwargs):
-        # TODO: 这个接口还没做
-        username = "Admin"
-        roles = ["admin", "manager"]
+        token = request.META.get("HTTP_AUTHORIZATION")
+
+        try:
+            token = token.split(' ')[1]  # 提取令牌部分
+        except IndexError:
+            token = None
+
+        try:
+            token = Token.objects.get(key=token)
+        except Token.DoesNotExist:
+            response_data = {
+                "code": 401,
+                "data": {},
+                "message": "用户未登录"
+            }
+            return Response(response_data)
+
+        user: User = token.user
+        if not user:
+            response_data = {
+                "code": 401,
+                "data": {},
+                "message": "未找到用户信息"
+            }
+            return Response(response_data)
+
+        try:
+            roles = user.get_permissions()
+        except Exception as e:
+            logger.error(f"获取用户权限时发生错误({user.permissions}): {e}")
+            response_data = {
+                "code": 500,
+                "data": {},
+                "message": "服务器发生未知错误"
+            }
+            return Response(response_data)
 
         response_data = {
             "code": 0,
             "data": {
-                "username": username,
+                "username": user.username,
                 "roles": roles
             },
             "message": "成功"
