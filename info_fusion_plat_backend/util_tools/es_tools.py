@@ -5,6 +5,8 @@ from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
+# TODO 这个文件里的内容还有待优化
+
 def get_daily_datas():
     """从ES中获取过去24小时的数据
 
@@ -223,7 +225,7 @@ def get_count_by_index(indexs):
     Returns:
         int: 文档数量
     """
-    es = Elasticsearch(['http://192.168.238.128:9200'])
+    es = Elasticsearch(['http://192.168.31.50:9200'])
 
     if isinstance(indexs, str):
         indexs = [indexs]

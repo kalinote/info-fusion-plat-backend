@@ -5,6 +5,8 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 
+from .serializers import UserRegistrationSerializer
+
 class VerificationCode(APIView):
     permission_classes = [AllowAny]
     def get(self, request, *args, **kwargs):
@@ -43,12 +45,14 @@ class UserLogin(APIView):
         else:
             response_data = {
                 "code": 401,
+                "data": {},
                 "message": "用户名或密码错误"
             }
             return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserInfo(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, *args, **kwargs):
         # TODO: 这个接口还没做
         username = "Admin"
@@ -63,3 +67,17 @@ class UserInfo(APIView):
             "message": "成功"
         }
         return Response(response_data)
+    
+    def post(self, request, *args, **kwargs):
+        """用户注册接口
+        """
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            if user:
+                return Response({
+                    "code": 0,
+                    "data": {},
+                    "message": "注册成功"
+                }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

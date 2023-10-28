@@ -93,7 +93,7 @@ DATABASES = {
         "NAME": "info_fusion_plat",
         "USER": "root",
         "PASSWORD": "st3zvPr4expaszYRcRgrK.!8Cb6nbbDD",
-        "HOST": "192.168.31.200",
+        "HOST": "192.168.31.50",
         "PORT": "3306",
     }
 }
@@ -152,3 +152,9 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = "user_action.User"
+
+## 下面是自定义配置项
+CRAWLAB_HOST = '192.168.31.50'
+CRAWLAB_PORT = 8080
+CRAWLAB_ACCOUNT = 'admin'
+CRAWLAB_PASSWORD = 'HgTQytfDB7t9qjz_aXGdYHCsQf@Dv9@m*7EbTgD_p6LFa8zRtH!7!3.izsrKr9ZT7oANcZ.4ykqLVRWGB9bAF7NhRJVjh@qzU9A.'

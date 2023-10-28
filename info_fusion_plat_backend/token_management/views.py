@@ -13,18 +13,18 @@ class PlatfromTokenView(APIView):
         datas['create_time'] = time.time()
         datas['update_time'] = time.time()
 
-        env_var_name = datas.get('env_var_name')
-        if not env_var_name:
+        token_name = datas.get('token_name')
+        if not token_name:
             return Response({
                 'code': 1,
                 'message': '环境变量名不能为空',
                 'data': {}
             })
-        check_exists = PlatformToken.objects.filter(env_var_name=env_var_name, is_deleted=False).exists()       
+        check_exists = PlatformToken.objects.filter(token_name=token_name, is_deleted=False).exists()       
         if check_exists:
             return Response({
                 'code': 2,
-                'message': f'{env_var_name}已存在, 不能重复添加。 ',
+                'message': f'{token_name}已存在, 不能重复添加。 ',
                 'data': {}
             })
         
@@ -54,7 +54,7 @@ class PlatfromTokenView(APIView):
         })
 
     def get(self, request, *args, **kwargs):
-        query_env_var_name = request.query_params.get('env_var_name', None)
+        query_token_name = request.query_params.get('token_name', None)
         query_platform = request.query_params.get('platform', None)
         
         try:
@@ -62,8 +62,8 @@ class PlatfromTokenView(APIView):
             tokens = PlatformToken.objects.filter(is_deleted=False)
 
             # 如果提供了查询参数，根据参数进行过滤
-            if query_env_var_name:
-                tokens = tokens.filter(env_var_name__icontains=query_env_var_name)
+            if query_token_name:
+                tokens = tokens.filter(token_name__icontains=query_token_name)
             if query_platform:
                 tokens = tokens.filter(platform__icontains=query_platform)
 
