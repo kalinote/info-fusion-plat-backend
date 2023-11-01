@@ -7,5 +7,6 @@ urlpatterns = [
     path('', include('dashboard.urls')),
     path('', include('token_management.urls')),
     path('', include('docker_controller.urls')),
-    path('', include('agent_workflow.urls'))
+    path('', include('agent_workflow.urls')),
+    path('', include('spider_management.urls')),
 ]
