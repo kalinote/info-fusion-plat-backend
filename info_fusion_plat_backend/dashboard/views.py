@@ -174,48 +174,48 @@ class NodeInfo(APIView):
             'data': {"list": [
                 [
                     {
-                    'title': "在线节点",
-                    'color': { 'background': "#7ABBFF" },
-                    'icon': "node",
-                    'value': node_info['data'].get('nodes', 0)
-                    },
-                    {
-                    'title': "项目",
+                    'title': "项目总数",
                     'color': { 'background': "#7ABBFF" },
                     'icon': "project",
                     'value': node_info['data'].get('projects', 0)
                     },
                     {
-                    'title': "爬虫",
+                    'title': "采集程序",
                     'color': { 'background': "#7ABBFF" },
                     'icon': "spider",
-                    'value': node_info['data'].get('spiders', 0)
+                    'value':node_info['data'].get('spiders', 0)
                     },
                     {
-                    'title': "定时任务",
+                    'title': "清洗程序",
                     'color': { 'background': "#7ABBFF" },
-                    'icon': "timed-task",
-                    'value': node_info['data'].get('schedules', 0)
+                    'icon': "clean",
+                    'value': 0
+                    },
+                    {
+                    'title': "分析程序",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "analysis",
+                    'value': 0
                     }
                 ],
                 [
+                    {
+                    'title': "监控程序",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "monitor",
+                    'value': 0
+                    },
+                    {
+                    'title': "Agent工作",
+                    'color': { 'background': "#7ABBFF" },
+                    'icon': "agent",
+                    'value': 0
+                    },
                     {
                     'title': "任务总数",
                     'color': { 'background': "#7ABBFF" },
                     'icon': "task-count",
                     'value': node_info['data'].get('tasks', 0)
-                    },
-                    {
-                    'title': "错误任务",
-                    'value': node_info['data'].get('error_tasks', 0),
-                    'color': { 'background': "#F87F7D" },
-                    'icon': "error"
-                    },
-                    {
-                    'title': "结果总数",
-                    'color': { 'background': "#B3E19D" },
-                    'icon': "result-count",
-                    'value': node_info['data'].get('results', 0)
                     },
                     {
                     'title': "正在运行",

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'token_management.apps.TokenManagementConfig',
     'docker_controller.apps.DockerControllerConfig',
     'agent_workflow.apps.AgentWorkflowConfig',
+    'spider_management.apps.SpiderManagementConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]
@@ -154,7 +155,13 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = "user_action.User"
 
 ## 下面是自定义配置项
+# crawlab
 CRAWLAB_HOST = '192.168.31.50'
 CRAWLAB_PORT = 8080
 CRAWLAB_ACCOUNT = 'admin'
 CRAWLAB_PASSWORD = 'HgTQytfDB7t9qjz_aXGdYHCsQf@Dv9@m*7EbTgD_p6LFa8zRtH!7!3.izsrKr9ZT7oANcZ.4ykqLVRWGB9bAF7NhRJVjh@qzU9A.'
+
+# elasticsearch
+ES_HOST = "192.168.31.50"
+ES_PORT = 9200
+ES_URLS = [f'http://{ES_HOST}:{ES_PORT}']

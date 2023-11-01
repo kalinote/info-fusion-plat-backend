@@ -2,19 +2,20 @@ import logging
 import json
 from datetime import datetime, timedelta
 from elasticsearch import Elasticsearch
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 # TODO 这个文件里的内容还有待优化
 
-def get_daily_datas():
+def get_daily_datas(index):
     """从ES中获取过去24小时的数据
 
     Returns:
         list: es返回的数据list
     """    
     # 定义Elasticsearch连接
-    es = Elasticsearch(['http://192.168.238.128:9200'])
+    es = Elasticsearch(getattr(settings, 'ES_URLS', ['http://192.168.31.50:9200']))
 
     # 计算过去24小时的时间范围
     now = datetime.now()
@@ -48,7 +49,7 @@ def get_daily_datas():
     try:
         while True:
             result = es.search(
-                index='rss_handle', 
+                index=index, 
                 body=query, 
                 from_=(page - 1) * page_size, 
                 size=page_size
@@ -60,10 +61,10 @@ def get_daily_datas():
             for hit in result['hits']['hits']:
                 source = hit['_source']
 
-                #region 处理来源
-                if source.get('table_type', 'None') == 'rss':
-                    source['source'] = ["一级来源: " + source['table_type'], "二级来源: " + source['rss_type'], "三级来源: " + source['platform']]
-                #endregion
+                # #region 处理来源
+                # if source.get('table_type', 'None') == 'rss':
+                #     source['source'] = ["一级来源: " + source['table_type'], "二级来源: " + source['rss_type'], "三级来源: " + source['platform']]
+                # #endregion
 
                 datas.append(source)
             
