@@ -73,9 +73,12 @@ class PlatfromTokenView(APIView):
             return Response({
                 'code': 1,
                 'message': '获取Token列表时发生未知错误',
-                'data': {}
+                'data': {
+                    "list": [],
+                    "total": 0
+                }
             })
-        
+
         return Response({
             'code': 0,
             'message': '成功',

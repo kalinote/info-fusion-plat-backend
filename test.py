@@ -9,7 +9,7 @@ data = json.dumps(
 )
 
 response = requests.post(
-    url=f"http://192.168.31.50:8080/api/login",
+    url=f"http://192.168.31.50:8080/api/spiders?stats=True",
     data=data
 )
 
