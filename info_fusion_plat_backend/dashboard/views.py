@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 class CollectedInfoSummaryData(APIView):
     def get(self, request, *args, **kwargs):
-        # datas = get_daily_datas()
+        datas = get_daily_datas("crawled_data_original")
 
         # tags = calculate_tags(datas)
 
-        # total_info_count = get_count_by_index("rss_handle")
-        # daily_info_count = len(datas)
+        total_info_count = get_count_by_index("crawled_data_original")
+        daily_info_count = len(datas)
 
         # response_data = {
         #     'code': 0,
@@ -34,8 +34,8 @@ class CollectedInfoSummaryData(APIView):
         response_data = {
             'code': 0,
             'data': {
-                "totalInfo": 0,
-                "dailyNewInfo": 0,
+                "totalInfo": total_info_count,
+                "dailyNewInfo": daily_info_count,
                 "tags": ['该功能开发尚未完成']
             },
             'message': "成功"
@@ -44,39 +44,40 @@ class CollectedInfoSummaryData(APIView):
 
 class DailyNewInfo(APIView):
     def get(self, request, *args, **kwargs):
-        # datas = get_daily_datas()[:10]
-        # data_list = []
-        # for data in datas:
-        #     data_list.append({
-        #         'content': data['post_content'],
-        #         'tags': list(json.loads(data.get('keywords', '{}')).keys())[:10],
-        #         'source': data['source'],
-        #         'meta': data['meta']
-        #     })
+        datas = get_daily_datas("crawled_data_original")[:10]
+        data_list = []
+        for data in datas:
+            data_list.append({
+                'content': data['raw_content'],
+                'tags': data.get('tags')[:10],
+                'source': ["来源： " + data['platform']], # TODO 暂时先显示这个
+                'meta': ["类型： " + data['source_type']], # TODO 暂时先显示这个
+            })
 
-        # response_data = {
-        #     'code': 0,
-        #     'data': {
-        #         "list": data_list,
-        #     },
-        #     'message': "成功"
-        # }
-
-        # TODO 完善最新信息功能
         response_data = {
             'code': 0,
             'data': {
-                "list": [
-                    {
-                        'content': "该功能开发尚未完成",
-                        'tags': ["暂无tags"],
-                        'source': ['来自系统提示'],
-                        'meta': []
-                    }
-                ],
+                "list": data_list,
+                "total": len(data_list)
             },
             'message': "成功"
         }
+
+        # TODO 完善最新信息功能
+        # response_data = {
+        #     'code': 0,
+        #     'data': {
+        #         "list": [
+        #             {
+        #                 'content': "该功能开发尚未完成",
+        #                 'tags': ["暂无tags"],
+        #                 'source': ['来自系统提示'],
+        #                 'meta': []
+        #             }
+        #         ],
+        #     },
+        #     'message': "成功"
+        # }
         return Response(response_data)
 
 

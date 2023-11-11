@@ -25,7 +25,7 @@ def get_daily_datas(index):
     query = {
         "query": {
             "range": {
-                "post_time": {
+                "publish_time": {
                     "gte": twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S'),
                     "lte": now.strftime('%Y-%m-%d %H:%M:%S')
                 }
@@ -33,7 +33,7 @@ def get_daily_datas(index):
         },
         "sort": [
             {
-                "post_time": {
+                "publish_time": {
                     "order": "desc"
                 }
             }
@@ -54,7 +54,7 @@ def get_daily_datas(index):
                 from_=(page - 1) * page_size, 
                 size=page_size
             )
-            
+
             if not result['hits']['hits']:
                 break
             
