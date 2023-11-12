@@ -24,7 +24,7 @@ class AllSpidersView(APIView):
             token = get_crawlab_token()
         except Exception as e:
             return Response({
-                'code': 1,
+                'code': 101,
                 'message': f'{e}',
                 'data': {}
             })
@@ -183,4 +183,112 @@ class RssParamsTemplateView(APIView):
                 "list": serializer.data,
                 "total": len(serializer.data)
             }
+        })
+
+class DeployRssTemplate(APIView):
+    def post(self, request, *args, **kwargs):
+        datas = request.data
+        template_id = datas.get("id")
+        template_operate = datas.get("operate")
+
+        if not template_id or not template_operate:
+            return Response({
+                'code': 1,
+                'message': f"缺少参数，请检查。",
+                'data': {}
+            })
+
+        # 获取crawlab token
+        try:
+            token = get_crawlab_token()
+        except Exception as e:
+            return Response({
+                'code': 101,
+                'message': f'{e}',
+                'data': {}
+            })
+
+        template = RssParamsTemplate.objects.filter(id=template_id).first()
+        if not template:
+            return Response({
+                'code': 2,
+                'message': f"指定id的RSS采集模板不存在: {template_id}",
+                'data': {}
+            })
+
+        template_serializer = RssParamsTemplateSerializer(template)
+
+        if template_operate == 'deploy':
+            # spider_id 暂时先写死，还没有想到更好的方法
+            rss_spider_id = "654b822328e4101ac61c253c"
+            try:
+                rss_spider = requests.get(
+                    url=f"http://{getattr(settings, 'CRAWLAB_HOST', '192.168.31.50')}:{getattr(settings, 'CRAWLAB_PORT', 8080)}/api/spiders/{rss_spider_id}",
+                    headers={
+                        'Authorization': token
+                    }
+                )
+
+                rss_spider_data = json.loads(rss_spider.content).get("data")
+            except Exception as e:
+                return ({
+                    'code': 102,
+                    'message': f"获取采集器信息失败: {e}",
+                    'data': {}
+                })
+
+            params = f"--host {template_serializer.data['host']} --protocol {template_serializer.data['protocol']} --route {template_serializer.data['route']} --tags {' '.join(template_serializer.data['tags'])} --platform {template_serializer.data['platform_name']} --category {template_serializer.data['category']} --proxy 192.106.31.50:7890"
+            if template_serializer.data['additional_params'].items():
+                params += f" --params {' '.join(key + '=' + value for key, value in template_serializer.data['additional_params'].items())}"
+            create_schedule_data = {
+                "name": template_serializer.data['name'],
+                "description": "string",
+                "spider_id": rss_spider_id,
+                "cron": template_serializer.data['running_cycle'],
+                "cmd": rss_spider_data.get("cmd"),
+                "params": params,
+                "mode": "random"
+            }
+
+            try:
+                result = requests.post(
+                    url=f"http://{getattr(settings, 'CRAWLAB_HOST', '192.168.31.50')}:{getattr(settings, 'CRAWLAB_PORT', 8080)}/api/schedules",
+                    headers={
+                        'Authorization': token
+                    },
+                    json=create_schedule_data
+                )
+
+                result = json.loads(result.content)
+                print(json.dumps(result, indent=4))
+
+                if result.get('message') != 'success':
+                    return Response({
+                        'code': 104,
+                        'message': f"采集器返回状态错误: {result.get('error')}",
+                        'data': {}
+                    })
+            except Exception as e:
+                return ({
+                    'code': 103,
+                    'message': f"向采集器部署任务失败: {e}",
+                    'data': {}
+                })
+        elif template_operate == 'enable':
+            # TODO 调用POST /api/schedules/{id}/enabled接口
+            pass
+        elif template_operate == 'disable':
+            # TODO 调用POST /api/schedules/{id}/disabled接口
+            pass
+        else:
+            return Response({
+                'code': 3,
+                'message': f'操作无法识别: {template_operate}, 允许的操作: deploy/enable/disable',
+                'data': {}
+            })
+
+        return Response({
+            'code': 0,
+            'message': '成功',
+            'data': {}
         })
