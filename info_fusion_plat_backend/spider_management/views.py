@@ -105,8 +105,15 @@ class AllSpidersView(APIView):
 class RssParamsTemplateView(APIView):
     def post(self, request, *args, **kwargs):
         datas = request.data
+
+        # 处理一些预设信息
+        del datas['id']
+        datas['deploy_status'] = '未部署'
+        datas['is_deleted'] = False
         datas['create_time'] = time.time()
         datas['update_time'] = time.time()
+
+        print(datas)
 
         protocol = datas.get("protocol")
         host = datas.get("host")
