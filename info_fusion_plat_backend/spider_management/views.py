@@ -238,9 +238,9 @@ class DeployRssTemplate(APIView):
                     'data': {}
                 })
 
-            params = f"--host {template_serializer.data['host']} --protocol {template_serializer.data['protocol']} --route {template_serializer.data['route']} --tags {' '.join(template_serializer.data['tags'])} --platform {template_serializer.data['platform_name']} --category {template_serializer.data['category']} --proxy 192.106.31.50:7890"
+            param = f"--host {template_serializer.data['host']} --protocol {template_serializer.data['protocol']} --route {template_serializer.data['route']} --tags {' '.join(template_serializer.data['tags'])} --platform {template_serializer.data['platform_name']} --category {template_serializer.data['category']} --proxy 192.106.31.50:7890"
             if template_serializer.data['additional_params'].items():
-                params += f" --params {' '.join(key + '=' + value for key, value in template_serializer.data['additional_params'].items())}"
+                param += f" --params {' '.join(key + '=' + value for key, value in template_serializer.data['additional_params'].items())}"
 
             description = {
                 "description": template_serializer.data['description'],
@@ -254,7 +254,7 @@ class DeployRssTemplate(APIView):
                 "spider_id": rss_spider_id,
                 "cron": template_serializer.data['running_cycle'],
                 "cmd": rss_spider_data.get("cmd"),
-                "params": params,
+                "param": param,
                 "mode": "random"
             }
 
@@ -322,6 +322,16 @@ class DeployRssTemplate(APIView):
                     'message': f"采集器返回状态错误: {result.get('error')}",
                     'data': {}
                 })
+
+            try:
+                template.deploy_status = "已启用"
+                template.save()
+            except Exception as e:
+                return Response({
+                    'code': 4,
+                    'message': f"数据库更新状态失败: {e}",
+                    'data': {}
+                })
         elif template_operate == 'disable':
             result = requests.post(
                 url=f"http://{getattr(settings, 'CRAWLAB_HOST', '192.168.31.50')}:{getattr(settings, 'CRAWLAB_PORT', 8080)}/api/schedules/{template_serializer.data['schedules_id']}/disable",
@@ -336,6 +346,16 @@ class DeployRssTemplate(APIView):
                 return Response({
                     'code': 108,
                     'message': f"采集器返回状态错误: {result.get('error')}",
+                    'data': {}
+                })
+            
+            try:
+                template.deploy_status = "已部署,但未启用"
+                template.save()
+            except Exception as e:
+                return Response({
+                    'code': 5,
+                    'message': f"数据库更新状态失败: {e}",
                     'data': {}
                 })
         else:
