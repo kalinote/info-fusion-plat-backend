@@ -16,6 +16,7 @@ class RssParamsTemplate(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     deploy_status = models.CharField(max_length=256, default="未部署") # 未部署/已部署,但未启用/已启用
+    schedules_id = models.CharField(max_length=128, blank=True)
     is_deleted = models.BooleanField(default=False)
 
     def __str__(self) -> str:

@@ -108,12 +108,13 @@ class RssParamsTemplateView(APIView):
 
         # 处理一些预设信息
         del datas['id']
+        del datas['schedules_id']
         datas['deploy_status'] = '未部署'
         datas['is_deleted'] = False
         datas['create_time'] = time.time()
         datas['update_time'] = time.time()
 
-        print(datas)
+        # print(datas)
 
         protocol = datas.get("protocol")
         host = datas.get("host")
@@ -240,9 +241,16 @@ class DeployRssTemplate(APIView):
             params = f"--host {template_serializer.data['host']} --protocol {template_serializer.data['protocol']} --route {template_serializer.data['route']} --tags {' '.join(template_serializer.data['tags'])} --platform {template_serializer.data['platform_name']} --category {template_serializer.data['category']} --proxy 192.106.31.50:7890"
             if template_serializer.data['additional_params'].items():
                 params += f" --params {' '.join(key + '=' + value for key, value in template_serializer.data['additional_params'].items())}"
+
+            description = {
+                "description": template_serializer.data['description'],
+                "develop_by": "admin", # 暂时写死
+                "template_id": template_serializer.data['id'],
+                "auto_develop": True
+            }
             create_schedule_data = {
                 "name": template_serializer.data['name'],
-                "description": "string",
+                "description": json.dumps(description, ensure_ascii=False),
                 "spider_id": rss_spider_id,
                 "cron": template_serializer.data['running_cycle'],
                 "cmd": rss_spider_data.get("cmd"),
@@ -260,7 +268,6 @@ class DeployRssTemplate(APIView):
                 )
 
                 result = json.loads(result.content)
-                print(json.dumps(result, indent=4))
 
                 if result.get('message') != 'success':
                     return Response({
@@ -269,17 +276,68 @@ class DeployRssTemplate(APIView):
                         'data': {}
                     })
             except Exception as e:
-                return ({
+                return Response({
                     'code': 103,
                     'message': f"向采集器部署任务失败: {e}",
                     'data': {}
                 })
+            
+            try:
+                # 保存定时任务id
+                template.schedules_id = result['data']['_id']
+                template.save()
+            except Exception as e:
+                # TODO 进行保存失败的回滚操作
+                return Response({
+                    'code': 105,
+                    'message': f"定时任务ID保存失败: {e}",
+                    'data': {}
+                })
+
+            try:
+                # 更新部署状态
+                enable = result['data']['enabled']
+                template.deploy_status = "已启用" if enable else "已部署,但未启用"
+                template.save()
+            except Exception as e:
+                return Response({
+                    'code': 106,
+                    'message': f"状态更新失败: {e}",
+                    'data': {}
+                })
+
         elif template_operate == 'enable':
-            # TODO 调用POST /api/schedules/{id}/enabled接口
-            pass
+            result = requests.post(
+                url=f"http://{getattr(settings, 'CRAWLAB_HOST', '192.168.31.50')}:{getattr(settings, 'CRAWLAB_PORT', 8080)}/api/schedules/{template_serializer.data['schedules_id']}/enable",
+                headers={
+                    'Authorization': token
+                }
+            )
+
+            result = json.loads(result.content)
+
+            if result.get('message') != 'success':
+                return Response({
+                    'code': 107,
+                    'message': f"采集器返回状态错误: {result.get('error')}",
+                    'data': {}
+                })
         elif template_operate == 'disable':
-            # TODO 调用POST /api/schedules/{id}/disabled接口
-            pass
+            result = requests.post(
+                url=f"http://{getattr(settings, 'CRAWLAB_HOST', '192.168.31.50')}:{getattr(settings, 'CRAWLAB_PORT', 8080)}/api/schedules/{template_serializer.data['schedules_id']}/disable",
+                headers={
+                    'Authorization': token
+                }
+            )
+            
+            result = json.loads(result.content)
+
+            if result.get('message') != 'success':
+                return Response({
+                    'code': 108,
+                    'message': f"采集器返回状态错误: {result.get('error')}",
+                    'data': {}
+                })
         else:
             return Response({
                 'code': 3,
