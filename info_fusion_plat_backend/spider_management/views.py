@@ -238,7 +238,7 @@ class DeployRssTemplate(APIView):
                     'data': {}
                 })
 
-            param = f"--host {template_serializer.data['host']} --protocol {template_serializer.data['protocol']} --route {template_serializer.data['route']} --tags {' '.join(template_serializer.data['tags'])} --platform {template_serializer.data['platform_name']} --category {template_serializer.data['category']} --proxy 192.106.31.50:7890"
+            param = f"--host {template_serializer.data['host']} --protocol {template_serializer.data['protocol']} --route {template_serializer.data['route']} --tags {' '.join(template_serializer.data['tags'])} --platform {template_serializer.data['platform_name']} --category {template_serializer.data['category']}"
             if template_serializer.data['additional_params'].items():
                 param += f" --params {' '.join(key + '=' + value for key, value in template_serializer.data['additional_params'].items())}"
 
