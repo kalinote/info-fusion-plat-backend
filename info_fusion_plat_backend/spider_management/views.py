@@ -107,8 +107,10 @@ class RssParamsTemplateView(APIView):
         datas = request.data
 
         # 处理一些预设信息
-        del datas['id']
-        del datas['schedules_id']
+        if datas.get("id"):
+            del datas['id']
+        if datas.get("schedules_id"):
+            del datas['schedules_id']
         datas['deploy_status'] = '未部署'
         datas['is_deleted'] = False
         datas['create_time'] = time.time()

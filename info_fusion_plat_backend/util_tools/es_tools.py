@@ -8,69 +8,60 @@ logger = logging.getLogger(__name__)
 
 # TODO 这个文件里的内容还有待优化
 
-def get_daily_datas(index):
+from elasticsearch import Elasticsearch, helpers
+
+def get_daily_datas(index, size=None):
     """从ES中获取过去24小时的数据
+
+    Args:
+        index (str): 索引名称
+        size (int, optional): 返回的文档数量。如果为None, 则返回全部文档(上限10000)。
 
     Returns:
         list: es返回的数据list
-    """    
+    """
     # 定义Elasticsearch连接
     es = Elasticsearch(getattr(settings, 'ES_URLS', ['http://192.168.31.50:9200']))
 
-    # 计算过去24小时的时间范围
+    # 设置查询的时间范围为过去24小时
     now = datetime.now()
-    twenty_four_hours_ago = now - timedelta(hours=24)
+    start_time = now - timedelta(days=1)
+    start_time_str = start_time.strftime("%Y-%m-%d %H:%M:%S")
 
     # 构建查询语句
     query = {
         "query": {
-            "range": {
-                "publish_time": {
-                    "gte": twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S'),
-                    "lte": now.strftime('%Y-%m-%d %H:%M:%S')
-                }
+            "bool": {
+                "filter": [
+                    {"range": {"publish_time": {"gte": start_time_str}}}
+                ]
             }
         },
-        "sort": [
-            {
-                "publish_time": {
-                    "order": "desc"
-                }
-            }
-        ]
+        "sort": [{"publish_time": {"order": "desc"}}]
     }
 
-    # 分页查询
-    page = 1
-    page_size = 500  # 每页返回的文档数量
+    # 判断是否使用scroll API
+    if size is None:
+        # 初始化scroll
+        scroll = '2m'  # 设置scroll时间
+        page = es.search(index=index, body=query, scroll=scroll, size=1000)
+        scroll_id = page['_scroll_id']
+        hits = page['hits']['hits']
 
-    datas = []
+        # 开始scroll
+        while len(page['hits']['hits']):
+            page = es.scroll(scroll_id=scroll_id, scroll=scroll)
+            scroll_id = page['_scroll_id']
+            hits.extend(page['hits']['hits'])
 
-    try:
-        while True:
-            result = es.search(
-                index=index, 
-                body=query, 
-                from_=(page - 1) * page_size, 
-                size=page_size
-            )
+        # 提取数据
+        datas = [hit['_source'] for hit in hits]
 
-            if not result['hits']['hits']:
-                break
-            
-            for hit in result['hits']['hits']:
-                source = hit['_source']
-
-                # #region 处理来源
-                # if source.get('table_type', 'None') == 'rss':
-                #     source['source'] = ["一级来源: " + source['table_type'], "二级来源: " + source['rss_type'], "三级来源: " + source['platform']]
-                # #endregion
-
-                datas.append(source)
-            
-            page += 1
-    except Exception as e:
-        logger.error(f"在查询ES时发生错误: {e}")
+    else:
+        # 使用正常查询
+        query['size'] = size
+        response = es.search(index=index, body=query)
+        datas = [hit['_source'] for hit in response['hits']['hits']]
 
     return datas
 
@@ -236,3 +227,32 @@ def get_count_by_index(indexs):
         count += es.count(index=index)['count']
 
     return count
+
+def find_similar_documents(target_vector, top_n=10):
+    """
+    在Elasticsearch中找出与给定嵌入向量最相似的文档。
+
+    :param target_vector: 目标文档的嵌入向量。
+    :param top_n: 返回的最相似文档数量。
+    :return: 最相似文档的列表。
+    """
+    # 连接到Elasticsearch
+    es = Elasticsearch([getattr(settings, 'ES_URLS', ['http://192.168.31.50:9200'])])
+
+    # 构建查询
+    query = {
+        "size": top_n,
+        "query": {
+            "script_score": {
+                "query": {"match_all": {}},
+                "script": {
+                    "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
+                    "params": {"query_vector": target_vector}
+                }
+            }
+        }
+    }
+
+    # 执行查询
+    response = es.search(index="crawled_data_preprocessed", body=query)
+    return response['hits']['hits']

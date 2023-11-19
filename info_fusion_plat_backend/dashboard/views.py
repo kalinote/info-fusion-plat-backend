@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class CollectedInfoSummaryData(APIView):
     def get(self, request, *args, **kwargs):
-        datas = get_daily_datas("crawled_data_original")
+        datas = get_daily_datas("crawled_data_original", size=None)
 
         # tags = calculate_tags(datas)
 
@@ -44,12 +44,12 @@ class CollectedInfoSummaryData(APIView):
 
 class DailyNewInfo(APIView):
     def get(self, request, *args, **kwargs):
-        datas = get_daily_datas("crawled_data_original")[:10]
+        datas = get_daily_datas("crawled_data_original", size=None)
         data_list = []
         for data in datas:
             data_list.append({
                 'content': data['raw_content'],
-                'tags': data.get('tags')[:10],
+                'tags': data.get('tags'),
                 'source': ["来源： " + data['platform']], # TODO 暂时先显示这个
                 'meta': ["类型： " + data['source_type']], # TODO 暂时先显示这个
             })
@@ -122,6 +122,8 @@ class NodeInfo(APIView):
             })
 
         node_info = json.loads(login_response.text)
+
+        # TODO 程序计数
 
         response_data = {
             'code': 0,
