@@ -53,9 +53,10 @@ def find_similar_documents(target_vector, top_n=10):
 
 
 if __name__ == '__main__':
-    embedding = get_embedding_from_uuid("c0097f343a0ec5070c5779389af199439ff7f4b7be6996ff61c1bcf9166674de")
+    embedding = get_embedding_from_uuid("27c805ba1a0890fac1849d301fef2861ef36fd575c2d6b011517b8f3dbf894b0")
     # print(embedding)
 
     similar_docs = find_similar_documents(embedding)
     for doc in similar_docs:
+        print("---------------------")
         print(doc['_source']['cleaned_html_content'])

@@ -50,8 +50,8 @@ class DailyNewInfo(APIView):
             data_list.append({
                 'content': data['raw_content'],
                 'tags': data.get('tags'),
-                'source': ["来源： " + data['platform']], # TODO 暂时先显示这个
-                'meta': ["类型： " + data['source_type']], # TODO 暂时先显示这个
+                'source': ["来源： " + data['platform'], "作者： " + data["author"]], # TODO 暂时先显示这个
+                'meta': ["类型： " + data['source_type'], "发布时间： " + data["publish_time"]], # TODO 暂时先显示这个
             })
 
         response_data = {
