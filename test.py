@@ -60,3 +60,4 @@ if __name__ == '__main__':
     for doc in similar_docs:
         print("---------------------")
         print(doc['_source']['cleaned_html_content'])
+
