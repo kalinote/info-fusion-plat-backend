@@ -10,12 +10,13 @@ logger = logging.getLogger(__name__)
 
 from elasticsearch import Elasticsearch, helpers
 
-def get_daily_datas(index, size=None):
+def get_daily_datas(index, size=None, page=None, without_categorys: list = [], without_platform: list = []):
     """从ES中获取过去24小时的数据
 
     Args:
         index (str): 索引名称
-        size (int, optional): 返回的文档数量。如果为None, 则返回全部文档(上限10000)。
+        size (int, optional): 返回的文档数量。如果为None, 则返回全部文档(上限10000, TODO 后面再想办法解决)。
+        page (int, optional): 分页参数，指定返回的页数。
 
     Returns:
         list: es返回的数据list
@@ -25,7 +26,8 @@ def get_daily_datas(index, size=None):
 
     # 设置查询的时间范围为过去24小时
     now = datetime.now()
-    start_time = now - timedelta(days=1)
+    # TODO 暂时改成7天，后续通过参数控制
+    start_time = now - timedelta(days=7)
     start_time_str = start_time.strftime("%Y-%m-%d %H:%M:%S")
 
     # 构建查询语句
@@ -34,36 +36,46 @@ def get_daily_datas(index, size=None):
             "bool": {
                 "filter": [
                     {"range": {"publish_time": {"gte": start_time_str}}}
-                ]
+                ],
+                "must_not": [],
             }
         },
         "sort": [{"publish_time": {"order": "desc"}}]
     }
 
-    # 判断是否使用scroll API
-    if size is None:
-        # 初始化scroll
-        scroll = '2m'  # 设置scroll时间
-        page = es.search(index=index, body=query, scroll=scroll, size=1000)
-        scroll_id = page['_scroll_id']
-        hits = page['hits']['hits']
+    for tag in without_categorys:
+        query["query"]["bool"]["must_not"].append(
+            {
+                "match": {
+                    "category": tag
+                }
+            }
+        )
 
-        # 开始scroll
-        while len(page['hits']['hits']):
-            page = es.scroll(scroll_id=scroll_id, scroll=scroll)
-            scroll_id = page['_scroll_id']
-            hits.extend(page['hits']['hits'])
+    for platform in without_platform:
+        query["query"]["bool"]["must_not"].append(
+            {
+                "match": {
+                    "platform": platform
+                }
+            }
+        )
 
-        # 提取数据
-        datas = [hit['_source'] for hit in hits]
-
-    else:
-        # 使用正常查询
+    # 分页处理
+    if page is None or page < 1:
+        page = 1
+    if size is not None:
+        start_from = (page - 1) * size
+        query['from'] = start_from
         query['size'] = size
-        response = es.search(index=index, body=query)
-        datas = [hit['_source'] for hit in response['hits']['hits']]
+
+    # 执行查询
+    response = es.search(index=index, body=query)
+    datas = [hit['_source'] for hit in response['hits']['hits']]
 
     return datas
+
+
 
 def calculate_tags(datas):
     """通过es返回数据的list, 计算出关键词的权重
@@ -228,6 +240,28 @@ def get_count_by_index(indexs):
 
     return count
 
+def get_embedding_from_uuid(uuid):
+    # 连接到Elasticsearch
+    es = Elasticsearch(['http://192.168.31.50:9200'])
+
+    query = {
+        "size": 1,
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "match": {
+                            "original_uuid": uuid
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+    response = es.search(index="crawled_data_preprocessed", body=query)
+    return response['hits']['hits'][0]['_source']['embedding']
+
 def find_similar_documents(target_vector, top_n=10):
     """
     在Elasticsearch中找出与给定嵌入向量最相似的文档。
@@ -256,3 +290,7 @@ def find_similar_documents(target_vector, top_n=10):
     # 执行查询
     response = es.search(index="crawled_data_preprocessed", body=query)
     return response['hits']['hits']
+
+def get_similar_documents_by_uuid(uuid, top_n=10):
+    embedding = get_embedding_from_uuid(uuid)
+    return find_similar_documents(embedding, top_n)

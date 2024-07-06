@@ -13,11 +13,16 @@ logger = logging.getLogger(__name__)
 
 class CollectedInfoSummaryData(APIView):
     def get(self, request, *args, **kwargs):
-        datas = get_daily_datas("crawled_data_original", size=None)
+        datas = get_daily_datas("crawled_data_original")
 
-        # tags = calculate_tags(datas)
+        # tags = calculate_tags(datas)1
 
-        total_info_count = get_count_by_index("crawled_data_original")
+        # TODO 查询结构优化
+        crawled_data_original = get_count_by_index("crawled_data_original")
+        bilibili_user_conunt = get_count_by_index("bilibili_user")
+        bilibili_dynamic_conunt = get_count_by_index("bilibili_dynamic")
+        bilibili_comment_conunt = get_count_by_index("bilibili_comment")
+        total_info_count = crawled_data_original + bilibili_user_conunt + bilibili_dynamic_conunt + bilibili_comment_conunt 
         daily_info_count = len(datas)
 
         # response_data = {
@@ -35,6 +40,8 @@ class CollectedInfoSummaryData(APIView):
             'code': 0,
             'data': {
                 "totalInfo": total_info_count,
+                # TODO 平台数据
+                "platformInfo": 0,
                 "dailyNewInfo": daily_info_count,
                 "tags": ['该功能开发尚未完成']
             },
@@ -44,14 +51,39 @@ class CollectedInfoSummaryData(APIView):
 
 class DailyNewInfo(APIView):
     def get(self, request, *args, **kwargs):
-        datas = get_daily_datas("crawled_data_original", size=None)
+        size = request.query_params.get("size")
+        page = request.query_params.get("page")
+        try:
+            if size:
+                size = int(size)
+            if page:
+                page = int(page)
+        except Exception as e:
+            return Response({
+            'code': 1,
+            'data': {
+                "list": [],
+                "total": 0
+            },
+            'message': f"参数类型错误: {e}"
+        })
+
+        datas = get_daily_datas("crawled_data_original", size, page, without_categorys=["NSFW"])
+
         data_list = []
         for data in datas:
+            # 过滤NSFW(后续换成参数控制)
+            if data['category'] in ['NSFW']:
+                continue
+
             data_list.append({
                 'content': data['raw_content'],
                 'tags': data.get('tags'),
-                'source': ["来源： " + data['platform'], "作者： " + data["author"]], # TODO 暂时先显示这个
-                'meta': ["类型： " + data['source_type'], "发布时间： " + data["publish_time"]], # TODO 暂时先显示这个
+                'author': data.get('author'),
+                'title': data.get('title'),
+                'publish_time': data.get('publish_time'),
+                'source': [data['platform'], data["author"]], # TODO 暂时先显示这个
+                'meta': [data['source_type'], "发布时间： " + data["publish_time"]], # TODO 暂时先显示这个
             })
 
         response_data = {
@@ -145,13 +177,13 @@ class NodeInfo(APIView):
                     'title': "清洗程序",
                     'color': { 'background': "#7ABBFF" },
                     'icon': "clean",
-                    'value': 0
+                    'value': 1
                     },
                     {
                     'title': "分析程序",
                     'color': { 'background': "#7ABBFF" },
                     'icon': "analysis",
-                    'value': 0
+                    'value': 2
                     }
                 ],
                 [
